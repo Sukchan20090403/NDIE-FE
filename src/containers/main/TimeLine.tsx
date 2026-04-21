@@ -37,7 +37,14 @@ export default function NDIETimeline() {
         const docRef = doc(db, "history", "timeline");
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setTimelineData(docSnap.data() as TimelineData);
+          const firebaseData = docSnap.data() as TimelineData;
+          // Firebase 데이터와 기본 데이터(defaultData)를 합쳐서 2024년이 사라지지 않게 합니다.
+          const mergedData = { ...defaultData, ...firebaseData };
+          setTimelineData(mergedData);
+
+          // 데이터 로드 후 목록에 있는 연도 중 첫 번째 연도를 자동으로 선택합니다.
+          const sortedYears = Object.keys(mergedData).sort((a, b) => a.localeCompare(b));
+          if (sortedYears.length > 0) setSelectedYear(sortedYears[0]); // 2024가 먼저 선택됨
         }
       } catch (e) {
         console.error("연혁 로드 실패:", e);
@@ -46,53 +53,80 @@ export default function NDIETimeline() {
     loadData();
   }, []);
 
-  const years = Object.keys(timelineData).sort();
+  // 연도를 오름차순(2024 -> 2025)으로 정렬하여 버튼을 보여줍니다.
+  const years = Object.keys(timelineData).sort((a, b) => a.localeCompare(b));
   const entries = timelineData[selectedYear] || [];
 
   return (
-    <div className="text-black font-sans relative pl-8 md:pl-0">
+    <div className="text-black font-sans relative pl-8 md:pl-0 max-w-4xl mx-auto py-10">
       {/* 제목 */}
-      <h1 className="text-2xl font-bold mb-12">
-        엔디(<span className="text-[#FFA037] font-bold">NDIE</span>)의{" "}
-        <span className="text-[#FFA037] font-bold">연혁</span>은 다음과 같습니다
+      <h1 
+        className="text-3xl font-bold mb-12 tracking-tight text-gray-800"
+        style={{ fontFamily: 'ui-rounded, "Hiragino Maru Gothic ProN", "Quicksand", sans-serif' }}
+      >
+        엔디(<span className="text-[#FF8200]">NDIE</span>)의{" "}
+        <span className="text-[#FF8200]">연혁</span>은 다음과 같습니다
       </h1>
-      <div className="flex items-center gap-6 text-xl mb-8 md:mb-12 overflow-x-auto whitespace-nowrap scrollbar-hide">
+
+      {/* 연도 선택 버튼 섹션 */}
+      <div className="flex items-center gap-4 mb-10 overflow-x-auto whitespace-nowrap pb-4 scrollbar-hide">
         {years.map((year, index) => (
-          <React.Fragment key={year}>
+          <div key={year} className="flex items-center">
             <button
-              className={`font-bold ${selectedYear === year ? "text-black" : "text-gray-400"
-                }`}
+              className={`px-8 py-3 rounded-full font-black text-xl transition-all duration-300 transform 
+                ${selectedYear === year 
+                  ? "bg-[#FF8200] text-white shadow-lg scale-110 z-10" 
+                  : "bg-gray-100 text-gray-400 hover:bg-gray-200 hover:scale-105"
+                } active:scale-95 cursor-pointer`}
               onClick={() => setSelectedYear(year)}
             >
               {year}
             </button>
             {index < years.length - 1 && (
-              <div className="w-12 h-px bg-gray-300" />
+              <div className="w-8 h-[2px] bg-gray-200 mx-2" />
             )}
-          </React.Fragment>
-        ))}
-      </div>
-      <div className="relative pl-10">
-        <div className="absolute left-9 top-2 bottom-0 w-[2px] bg-gray-200 z-0" />
-        <div className="absolute -left-10 top-1 text-lg font-bold bg-[#F8F8F8] px-1 z-10">
-          {selectedYear}
-        </div>
-        {entries.map((entry, index) => (
-          <div key={index} className="relative mb-14 pl-6 z-10">
-            <div
-              className={`absolute left-[-0.65rem] top-[0.35rem] w-3.5 h-3.5 rounded-full ${entry.type === "filled"
-                  ? "bg-[#D1D5DB]"
-                  : "border-2 border-[#D1D5DB] bg-white"
-                }`}
-            />
-            <div className="text-[17px] font-bold mb-2">
-              {entry.date} {entry.title}
-            </div>
-            <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">
-              {entry.description}
-            </p>
           </div>
         ))}
+      </div>
+
+      {/* 메모장 스타일 컨텐츠 영역 */}
+      <div className="relative group">
+        {/* 메모장 배경 및 그림자 효과 */}
+        <div className="absolute -inset-1 bg-gradient-to-r from-orange-100 to-orange-50 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+        
+        <div className="relative bg-[#FFFDF0] border border-orange-100 rounded-xl shadow-xl p-8 md:p-12 min-h-[400px]">
+          {/* 메모장 줄무늬 효과 - 선의 두께와 위치를 정교하게 조정 */}
+          <div 
+            className="absolute inset-0 opacity-20 pointer-events-none rounded-xl"
+            style={{
+              backgroundImage: 'linear-gradient(transparent 2.9rem, #FF8200 2.9rem)',
+              backgroundSize: '100% 3rem',
+              backgroundOrigin: 'content-box',
+              paddingTop: '0rem' 
+            }}
+          />
+          
+          {/* 왼쪽 빨간색 세로선 */}
+          <div className="absolute left-10 md:left-16 top-0 bottom-0 w-[1px] bg-red-200" />
+
+          <div className="relative z-10 pt-[0.2rem]">
+            {entries.length > 0 ? entries.map((entry, index) => (
+              <div key={index} className="pl-6 md:pl-10 mb-[3rem]">
+                {/* 제목 영역: items-end와 pb를 사용하여 선 위에 글자가 놓이게 함 */}
+                <div className="flex items-end gap-4 h-[3rem] pb-[0.5rem]">
+                  <span className="text-[#FF8200] font-black text-xl">{entry.date}</span>
+                  <h3 className="text-xl font-bold text-gray-800">{entry.title}</h3>
+                </div>
+                {/* 본문 영역: 줄 간격을 배경과 동일하게 3rem으로 설정 */}
+                <p className="text-gray-600 text-lg leading-[3rem] whitespace-pre-line ml-1">
+                  {entry.description}
+                </p>
+              </div>
+            )) : (
+              <div className="text-center text-gray-400 py-20 italic">데이터가 없습니다.</div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
