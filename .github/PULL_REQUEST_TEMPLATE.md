@@ -1,6 +1,4 @@
 ## 🎫 관련 이슈
-[//]: # (다음 키워드를 사용하면 해당 PR을 머지할 때 자동으로 이슈를 닫을 수 있습니다.)
-[//]: # (keyword: close|closes|closed|resolve|resolves|resolved|fix|fixes|fixed)
 [//]: # (예시: close #1)
 
 close #
@@ -8,10 +6,10 @@ close #
 <br>
 
 ## 📄 개요
-[//]: # (작업 내용을 간단히 요약해서 적습니다.)
-[//]: # (예시: 유저 회원가입 기능을 만들었습니다.)
+[//]: # (QnA에서 작성자 기준으로 오름차순)
 
 >
+
 
 <br>
 

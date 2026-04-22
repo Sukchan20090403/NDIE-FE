@@ -30,6 +30,11 @@ export function List({ name, data }: ListProps) {
           id: doc.id,
           ...doc.data()
         }));
+        items.sort((a: any, b: any) => {
+          if (a.writer < b.writer) return -1;
+          if (a.writer > b.writer) return 1;
+          return 0;
+        });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setitem(items as any);
       } catch (error) {
