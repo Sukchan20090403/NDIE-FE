@@ -26,6 +26,7 @@ export const Header = () => {
 
   const navLinks = [
     { href: "/", label: "홈" },
+    { href: "/about", label: "디지털포용성과네트워크" },
     { href: "/act", label: "활동" },
     { href: "/qna", label: "QnA" },
     { href: "/announcement", label: "공지사항" },
