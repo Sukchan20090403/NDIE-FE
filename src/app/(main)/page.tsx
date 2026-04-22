@@ -72,11 +72,11 @@ export default function Home() {
         </p>
         <Image src={B} alt="b" className="ml-auto max-w-full h-auto" />
       </ContentContainer>
-      <ContentContainer>
-        <OrgChart />
+      <ContentContainer className="pb-0">
+        <TimeLine />
       </ContentContainer>
       <ContentContainer>
-        <TimeLine />
+        <OrgChart />
       </ContentContainer>
       <ContentContainer>
         <InquiryForm />

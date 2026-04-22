@@ -1,79 +1,55 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { getFirebaseDb } from "@/lib/firebase";
+import React, { useState } from "react";
+import Link from "next/link";
 
 type OrgNode = {
   name: string;
   level: number;
+  href?: string;
   child?: OrgNode[];
 };
 
 const defaultData: OrgNode = {
-  name: "root",
+  name: "home",
   level: 0,
   child: [{
-    name: "child",
+    name: "새 항목",
     level: 1,
-    child: [
-      { name: "child2", level: 2 },
-      { name: "child2", level: 2 },
-      {
-        name: "child2",
-        level: 2,
-        child: [
-          { name: "child3.1", level: 3 },
-          { name: "child3.2", level: 3 },
-          { name: "child3.3", level: 3 }
-        ]
-      }
-    ]
+    href: "/announcement",
+    child: []
   }]
 };
 
 export default function OrgChart() {
-  const [orgTreeData, setOrgTreeData] = useState<OrgNode>(defaultData);
+  const [orgTreeData] = useState<OrgNode>(defaultData);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const db = await getFirebaseDb();
-        if (!db) return;
-
-        const { doc, getDoc } = await import("firebase/firestore");
-        const docRef = doc(db, "organization", "chart");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setOrgTreeData(docSnap.data() as OrgNode);
-        }
-      } catch (e) {
-        console.error("조직도 로드 실패:", e);
-      }
-    };
-    loadData();
-  }, []);
   return (
-    <div className="flex flex-col items-center py-12 w-full overflow-x-auto">
-      <div className="min-w-fit px-4">
+    <div className="flex flex-col items-center my-0 py-0 w-full overflow-x-auto">
+      <div className="min-w-fit px-0">
         <OrgNodeComponent node={orgTreeData} />
       </div>
     </div>
   );
 }
+
 type orgNodeComponentProps = {
   node: OrgNode;
 }
-const OrgNodeComponent = ({ node }: orgNodeComponentProps) => {
 
+const OrgNodeComponent = ({ node }: orgNodeComponentProps) => {
   return (
-    <div className="flex flex-col items-center gap-4 text-2xl">
-      <div className={`w-[12.5rem] h-[5rem] border-2 ${node.level == 0 ? "bg-[#ED9735] border-[#BD894D]" : node.level == 1 ? "bg-[#F4AA55] border-[#ED9735]" : node.level == 2 ? "bg-[#FCC07C] border-[#F4AA55]" : "bg-[#FFFFFF] border-[#FCC07C]"} flex justify-center items-center rounded-md`}>
+    <div className="flex flex-row items-center gap-2">
+      <Link 
+        href={node.href || "/"}
+        className="w-48 h-14 px-6 text-lg bg-white shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)] flex justify-center items-center rounded-md cursor-pointer hover:shadow-[0_4px_6px_rgba(0,0,0,0.1),0_2px_4px_rgba(0,0,0,0.06)] hover:bg-orange-50 transition-all duration-200"
+      >
         {node.name}
-      </div>
-      <div className={`flex ${node.level == 2 ? 'flex-col' : 'flex-row gap-6'}`}>
-        {node.child?.map((child: OrgNode, index) => {
-          return <OrgNodeComponent key={index} node={child} />
-        })}
-      </div>
+      </Link>
+      {node.child?.map((child: OrgNode, index) => {
+        return <Link key={index} href={child.href || "/"} className="w-48 h-14 px-6 text-lg bg-white shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)] flex justify-center items-center rounded-md cursor-pointer hover:shadow-[0_4px_6px_rgba(0,0,0,0.1),0_2px_4px_rgba(0,0,0,0.06)] hover:bg-orange-50 transition-all duration-200">
+          {child.name}
+        </Link>
+      })}
     </div>
-  )
+  );
 }
